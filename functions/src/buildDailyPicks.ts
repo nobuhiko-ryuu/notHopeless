@@ -93,6 +93,9 @@ export const buildDailyPicks = functions.onSchedule(
     }
 
     // --- Candidate 3: Stocks by usedAt ascending to fill remaining slots ---
+    // stocks コレクションのドキュメントは posts とは別物。
+    // フォールバック時は stock の内容を posts コレクションに isStock:true で書き込み、
+    // その postId を pickIds に追加する。
     if (pickIds.length < 3) {
       const needed = 3 - pickIds.length;
       const stocksSnap = await db
@@ -106,15 +109,29 @@ export const buildDailyPicks = functions.onSchedule(
 
       for (const doc of stocksSnap.docs) {
         if (added >= needed) break;
-        const postId: string = doc.data().postId as string;
-        if (postId && !pickIds.includes(postId)) {
-          pickIds.push(postId);
-          // Update usedAt to now
-          batch.update(doc.ref, {
-            usedAt: admin.firestore.FieldValue.serverTimestamp(),
-          });
-          added++;
-        }
+        const stockData = doc.data();
+
+        // stock を posts コレクションに isStock:true で書き込む
+        const newPostRef = db.collection('posts').doc();
+        batch.set(newPostRef, {
+          authorId: 'system',
+          scene: stockData.scene,
+          kindnessType: stockData.kindnessType,
+          userState: null,
+          effect: stockData.effect,
+          body: stockData.body,
+          reactionCounts: { notHopeless: 0, moved: 0, doToo: 0 },
+          isStock: true,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          status: 'visible',
+        });
+        // stock の usedAt を更新
+        batch.update(doc.ref, {
+          usedAt: admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        pickIds.push(newPostRef.id);
+        added++;
       }
 
       if (added > 0) {

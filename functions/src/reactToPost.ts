@@ -42,7 +42,14 @@ export const reactToPost = functions.onCall(async (request) => {
 
   // 3. Firestore transaction
   await db.runTransaction(async (tx) => {
-    const reactionSnap = await tx.get(reactionRef);
+    const [reactionSnap, postSnap] = await Promise.all([
+      tx.get(reactionRef),
+      tx.get(postRef),
+    ]);
+
+    if (!postSnap.exists) {
+      throw new functions.HttpsError('not-found', 'Post not found.');
+    }
 
     if (!reactionSnap.exists) {
       // Does not exist: create reaction and increment count

@@ -6,7 +6,7 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions/v2/https';
 import { VALID_REPORT_REASONS, ReportReason } from './types';
-import { validateEnum } from './validators';
+import { normalizeText, validateEnum } from './validators';
 
 interface ReportPostRequest {
   postId: string;
@@ -45,7 +45,7 @@ export const reportPost = functions.onCall(async (request) => {
     postId: data.postId,
     reporterUid: uid,
     reason: data.reason as ReportReason,
-    comment: data.comment ?? null,
+    comment: data.comment != null ? normalizeText(String(data.comment)).slice(0, 200) : null,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
   });
 

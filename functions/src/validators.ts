@@ -40,7 +40,9 @@ const SPECIFIC_NOUN_SUFFIXES = ['駅', '店', '会社', '学校', '病院', '公
  */
 const buildSpecificNounRegex = (): RegExp => {
   const kanjiKana = '[\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF\\u3400-\\u4DBF]';
-  const suffixAlternatives = SPECIFIC_NOUN_SUFFIXES.map((s) => s).join('|');
+  const suffixAlternatives = SPECIFIC_NOUN_SUFFIXES
+    .map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .join('|');
   return new RegExp(`${kanjiKana}+(${suffixAlternatives})`);
 };
 

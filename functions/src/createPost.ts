@@ -73,52 +73,34 @@ export const createPost = functions.onCall(async (request) => {
 
   const db = admin.firestore();
 
-  // 4. Cooldown check
+  // 4. Cooldown check + Write to Firestore (atomic transaction)
   const userRef = db.collection('users').doc(uid);
-  const userSnap = await userRef.get();
-  if (userSnap.exists) {
-    const lastPostAt: admin.firestore.Timestamp | undefined = userSnap.data()?.lastPostAt;
-    if (lastPostAt) {
-      const lastPostMs = lastPostAt.toMillis();
-      const nowMs = Date.now();
-      if (nowMs - lastPostMs < COOLDOWN_MS) {
-        throw new functions.HttpsError(
-          'resource-exhausted',
-          'Please wait before posting again.',
-          { code: 'COOLDOWN' }
-        );
-      }
-    }
-  }
-
-  // 5. Write to Firestore
   const now = admin.firestore.FieldValue.serverTimestamp();
-  const postData = {
-    uid,
-    body: normalizedBody,
-    scene: data.scene as Scene,
-    kindnessType: data.kindnessType as KindnessType,
-    userState: data.userState as UserState,
-    effect: data.effect as Effect,
-    status: 'visible',
-    reactionCounts: {
-      notHopeless: 0,
-      moved: 0,
-      doToo: 0,
-    },
-    isStock: false,
-    createdAt: now,
-  };
-
-  const batch = db.batch();
   const postRef = db.collection('posts').doc();
-  batch.set(postRef, postData);
 
-  // 6. Update users/{uid}.lastPostAt
-  batch.set(userRef, { lastPostAt: now }, { merge: true });
+  await db.runTransaction(async (tx) => {
+    // Cooldown check (atomic)
+    const userSnap = await tx.get(userRef);
+    const lastPostAt: admin.firestore.Timestamp | undefined = userSnap.data()?.lastPostAt;
+    if (lastPostAt && Date.now() - lastPostAt.toMillis() < COOLDOWN_MS) {
+      throw new functions.HttpsError('resource-exhausted', 'COOLDOWN');
+    }
+    // Write post and update user lastPostAt
+    tx.set(postRef, {
+      authorId: uid,
+      body: normalizedBody,
+      scene: data.scene as Scene,
+      kindnessType: data.kindnessType as KindnessType,
+      userState: data.userState as UserState,
+      effect: data.effect as Effect,
+      reactionCounts: { notHopeless: 0, moved: 0, doToo: 0 },
+      isStock: false,
+      createdAt: now,
+      status: 'visible',
+    });
+    tx.set(userRef, { lastPostAt: now, createdAt: now }, { merge: true });
+  });
 
-  await batch.commit();
-
-  // 7. Success response
+  // 5. Success response
   return { postId: postRef.id };
 });
