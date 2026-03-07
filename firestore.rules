@@ -1,0 +1,30 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    // posts: visible は全認証ユーザー、hidden は自分の投稿のみ読める
+    match /posts/{postId} {
+      allow read: if isAuth() && (
+        resource.data.status == 'visible' ||
+        resource.data.authorId == request.auth.uid
+      );
+      allow write: if false; // Cloud Functions (Admin SDK) のみ
+    }
+
+    // dailyPicks: 認証済みユーザーが読める
+    match /dailyPicks/{date} {
+      allow read: if isAuth();
+      allow write: if false;
+    }
+
+    // クライアントから直接操作禁止
+    match /reactions/{id}  { allow read, write: if false; }
+    match /reports/{id}    { allow read, write: if false; }
+    match /stocks/{id}     { allow read, write: if false; }
+    match /users/{uid}     { allow read, write: if false; }
+  }
+}
