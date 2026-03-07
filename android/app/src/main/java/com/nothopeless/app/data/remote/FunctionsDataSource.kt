@@ -34,8 +34,8 @@ class FunctionsDataSource @Inject constructor(
         functions.getHttpsCallable("reactToPost").call(data).await()
     }
 
-    suspend fun reportPost(postId: String, reason: String) {
-        val data = hashMapOf("postId" to postId, "reason" to reason)
+    suspend fun reportPost(postId: String, reason: String, comment: String? = null) {
+        val data = hashMapOf<String, Any?>("postId" to postId, "reason" to reason, "comment" to comment)
         functions.getHttpsCallable("reportPost").call(data).await()
     }
 

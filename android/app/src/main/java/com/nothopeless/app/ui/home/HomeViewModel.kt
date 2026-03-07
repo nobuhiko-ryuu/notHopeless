@@ -44,6 +44,11 @@ class HomeViewModel @Inject constructor(
 
     init { loadAll() }
 
+    fun refresh() {
+        _uiState.update { HomeUiState() }
+        loadAll()
+    }
+
     fun loadAll() {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, hasError = false) }
@@ -141,12 +146,11 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun buildFeedItems(posts: List<Post>): List<FeedItem> {
-        // インデックス 10, 21, 32... の後ろに AdCard を挿入
+        // 11件ごと（0-based index 10, 21, 32... の後ろ）に AdCard を挿入
         val result = mutableListOf<FeedItem>()
-        val adIndices = setOf(10, 21, 32, 43, 54)
         posts.forEachIndexed { index, post ->
             result.add(FeedItem.PostCard(post))
-            if (index in adIndices) result.add(FeedItem.AdCard)
+            if ((index + 1) % 11 == 0) result.add(FeedItem.AdCard)
         }
         return result
     }

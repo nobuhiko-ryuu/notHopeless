@@ -6,6 +6,6 @@ import javax.inject.Singleton
 
 @Singleton
 class ReportRepository @Inject constructor(private val functions: FunctionsDataSource) {
-    suspend fun report(postId: String, reason: String) =
-        functions.reportPost(postId, reason)
+    suspend fun report(postId: String, reason: String, comment: String? = null) =
+        functions.reportPost(postId, reason, comment)
 }

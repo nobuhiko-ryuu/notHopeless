@@ -13,6 +13,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -62,6 +63,15 @@ fun ReportBottomSheet(
                     Text(reason.label, modifier = Modifier.padding(top = 12.dp))
                 }
             }
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = uiState.comment,
+                onValueChange = { viewModel.onCommentChanged(it) },
+                label = { Text("コメント（任意）") },
+                supportingText = { Text("${uiState.comment.length}/200") },
+                modifier = Modifier.fillMaxWidth(),
+                maxLines = 4,
+            )
             Spacer(Modifier.height(16.dp))
             Button(
                 onClick = { viewModel.submit() },

@@ -14,6 +14,7 @@ import javax.inject.Inject
 data class ReportUiState(
     val postId: String = "",
     val selectedReason: ReportReason? = null,
+    val comment: String = "",
     val isSubmitting: Boolean = false,
     val isSuccess: Boolean = false,
     val hasError: Boolean = false,
@@ -34,12 +35,22 @@ class ReportViewModel @Inject constructor(
         _uiState.update { it.copy(selectedReason = reason) }
     }
 
+    fun onCommentChanged(text: String) {
+        _uiState.update { it.copy(comment = text.take(200)) }
+    }
+
     fun submit() {
         val s = _uiState.value
         if (s.selectedReason == null || s.isSubmitting) return
         viewModelScope.launch {
             _uiState.update { it.copy(isSubmitting = true, hasError = false) }
-            runCatching { reportRepository.report(s.postId, s.selectedReason.key) }
+            runCatching {
+                reportRepository.report(
+                    s.postId,
+                    s.selectedReason.key,
+                    comment = s.comment.ifBlank { null },
+                )
+            }
                 .onSuccess { _uiState.update { it.copy(isSubmitting = false, isSuccess = true) } }
                 .onFailure { _uiState.update { it.copy(isSubmitting = false, hasError = true) } }
         }
