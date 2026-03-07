@@ -57,7 +57,7 @@ export const buildDailyPicks = functions.onSchedule(
       .where('status', '==', 'visible')
       .where('createdAt', '>=', admin.firestore.Timestamp.fromDate(since24h))
       .orderBy('createdAt', 'desc')
-      .limit(10)
+      .limit(100)
       .get();
 
     // Sort by total reaction count descending, take top 3
@@ -81,7 +81,7 @@ export const buildDailyPicks = functions.onSchedule(
         .where('status', '==', 'visible')
         .where('createdAt', '>=', admin.firestore.Timestamp.fromDate(since72h))
         .orderBy('createdAt', 'desc')
-        .limit(20)
+        .limit(100)
         .get();
 
       for (const doc of posts72hSnap.docs) {
