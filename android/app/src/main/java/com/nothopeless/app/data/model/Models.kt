@@ -15,8 +15,13 @@ data class Post(
     ),
     val isStock: Boolean = false,
     val createdAt: Timestamp? = null,
-    val status: String = "visible",
+    val status: String = PostStatus.VISIBLE,
 )
+
+object PostStatus {
+    const val VISIBLE = "visible"
+    const val HIDDEN = "hidden"
+}
 
 enum class SceneType(val key: String, val label: String) {
     COMMUTE("commute", "通勤・通学"),

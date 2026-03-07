@@ -99,7 +99,7 @@ fun HomeScreen(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                         )
                     }
-                    items(uiState.dailyPicks) { post ->
+                    items(uiState.dailyPicks, key = { it.postId }) { post ->
                         PostCard(post = post, onReport = { onReport(post.postId) })
                     }
                     item { HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp)) }
@@ -112,7 +112,12 @@ fun HomeScreen(
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     )
                 }
-                items(uiState.feed) { item ->
+                items(uiState.feed, key = { item ->
+                    when (item) {
+                        is FeedItem.PostCard -> item.post.postId
+                        is FeedItem.AdCard -> "ad_${uiState.feed.indexOf(item)}"
+                    }
+                }) { item ->
                     when (item) {
                         is FeedItem.PostCard -> PostCard(
                             post = item.post,

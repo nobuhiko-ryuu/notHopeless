@@ -20,11 +20,13 @@ class OnboardingViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     fun nextPage() {
-        val current = _uiState.value.currentPage
-        if (current < 2) {
-            _uiState.update { it.copy(currentPage = current + 1) }
-        } else {
-            complete()
+        _uiState.update { state ->
+            if (state.currentPage < 2) {
+                state.copy(currentPage = state.currentPage + 1)
+            } else {
+                complete()
+                state
+            }
         }
     }
 

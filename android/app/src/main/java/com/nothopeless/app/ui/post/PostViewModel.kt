@@ -2,6 +2,7 @@ package com.nothopeless.app.ui.post
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.functions.FirebaseFunctionsException
 import com.nothopeless.app.data.model.EffectType
 import com.nothopeless.app.data.model.KindnessType
 import com.nothopeless.app.data.model.SceneType
@@ -37,14 +38,18 @@ class PostViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PostUiState())
     val uiState = _uiState.asStateFlow()
 
-    private val PROPER_NOUN_SUFFIXES = listOf(
-        "駅", "店", "会社", "学校", "病院", "公園", "さん", "くん", "ちゃん", "様"
-    )
-    private val kanjiKanaPattern = Regex(
-        "[\\u3040-\\u309F\\u30A0-\\u30FF\\u4E00-\\u9FFF]+(${PROPER_NOUN_SUFFIXES.joinToString("|")})"
-    )
-
     private var debounceJob: Job? = null
+
+    companion object {
+        private val PROPER_NOUN_SUFFIXES = listOf(
+            "駅", "店", "会社", "学校", "病院", "公園", "さん", "くん", "ちゃん", "様"
+        )
+        private val kanjiKanaPattern = Regex(
+            "[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF\u3400-\u4DBF]+(${
+                PROPER_NOUN_SUFFIXES.joinToString("|")
+            })"
+        )
+    }
 
     fun onSceneSelected(scene: SceneType) = _uiState.update { it.copy(scene = scene) }
     fun onKindnessTypeSelected(kt: KindnessType) = _uiState.update { it.copy(kindnessType = kt) }
@@ -103,6 +108,10 @@ class PostViewModel @Inject constructor(
     fun clearSuccess() = _uiState.update { it.copy(isSuccess = false) }
 
     private fun extractErrorCode(e: Throwable): String {
-        return e.message ?: "UNKNOWN"
+        return if (e is FirebaseFunctionsException) {
+            e.details?.toString() ?: e.code.name
+        } else {
+            "NETWORK"
+        }
     }
 }

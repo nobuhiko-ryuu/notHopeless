@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.nothopeless.app.data.model.EffectType
 import com.nothopeless.app.data.model.KindnessType
 import com.nothopeless.app.data.model.Post
+import com.nothopeless.app.data.model.PostStatus
 import com.nothopeless.app.data.model.ReactionType
 import com.nothopeless.app.data.model.SceneType
 import java.time.Instant
@@ -42,13 +43,13 @@ fun PostCard(
     reactionState: ReactionType? = null,
     onReact: (ReactionType) -> Unit = {},
     onReport: () -> Unit = {},
-    showReactionButtons: Boolean = post.status == "visible",
+    showReactionButtons: Boolean = post.status == PostStatus.VISIBLE,
 ) {
     Card(modifier = Modifier
         .fillMaxWidth()
         .padding(horizontal = 16.dp, vertical = 6.dp)) {
         Column(modifier = Modifier.padding(16.dp)) {
-            if (post.status == "hidden") {
+            if (post.status == PostStatus.HIDDEN) {
                 Text(
                     text = "この投稿は非表示になりました",
                     color = MaterialTheme.colorScheme.error,

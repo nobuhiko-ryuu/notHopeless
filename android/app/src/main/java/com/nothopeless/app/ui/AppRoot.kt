@@ -22,10 +22,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.nothopeless.app.ui.guidelines.GuidelinesScreen
 import com.nothopeless.app.ui.home.HomeScreen
-import com.nothopeless.app.ui.home.HomeViewModel
 import com.nothopeless.app.ui.my.MyScreen
 import com.nothopeless.app.ui.onboarding.OnboardingScreen
 import com.nothopeless.app.ui.post.PostScreen
@@ -49,7 +47,6 @@ val bottomTabs = listOf(
 @Composable
 fun AppRoot(startDestination: String = HOME) {
     NotHopelessTheme {
-        val homeViewModel: HomeViewModel = hiltViewModel()
         val navController = rememberNavController()
         var reportPostId by remember { mutableStateOf<String?>(null) }
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -105,9 +102,8 @@ fun AppRoot(startDestination: String = HOME) {
                     PostScreen(
                         onPostSuccess = {
                             navController.navigate(HOME) {
-                                popUpTo(HOME) { inclusive = false }
+                                popUpTo(HOME) { inclusive = true }
                             }
-                            homeViewModel.refresh()
                         }
                     )
                 }

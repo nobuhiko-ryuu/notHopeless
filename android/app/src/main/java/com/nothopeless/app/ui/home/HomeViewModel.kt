@@ -28,7 +28,7 @@ data class HomeUiState(
 
 sealed class FeedItem {
     data class PostCard(val post: Post) : FeedItem()
-    object AdCard : FeedItem()
+    class AdCard : FeedItem()
 }
 
 @HiltViewModel
@@ -43,11 +43,6 @@ class HomeViewModel @Inject constructor(
     val snackbar = _snackbar.asSharedFlow()
 
     init { loadAll() }
-
-    fun refresh() {
-        _uiState.update { HomeUiState() }
-        loadAll()
-    }
 
     fun loadAll() {
         viewModelScope.launch {
@@ -150,7 +145,7 @@ class HomeViewModel @Inject constructor(
         val result = mutableListOf<FeedItem>()
         posts.forEachIndexed { index, post ->
             result.add(FeedItem.PostCard(post))
-            if ((index + 1) % 11 == 0) result.add(FeedItem.AdCard)
+            if ((index + 1) % 11 == 0) result.add(FeedItem.AdCard())
         }
         return result
     }

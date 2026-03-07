@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.nothopeless.app.data.model.PostStatus
 import com.nothopeless.app.ui.common.PostCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,10 +33,10 @@ fun MyScreen(
     val uiState by viewModel.uiState.collectAsState()
     Scaffold(topBar = { TopAppBar(title = { Text("マイ投稿") }) }) { padding ->
         when {
-            uiState.isLoading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            uiState.isLoading -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
             }
-            uiState.hasError -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            uiState.hasError -> Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text("読み込みに失敗しました")
                     Spacer(Modifier.height(16.dp))
@@ -54,7 +55,7 @@ fun MyScreen(
                 items(uiState.posts) { post ->
                     PostCard(
                         post = post,
-                        showReactionButtons = post.status == "visible",
+                        showReactionButtons = post.status == PostStatus.VISIBLE,
                         onReport = { onReport(post.postId) },
                     )
                 }
