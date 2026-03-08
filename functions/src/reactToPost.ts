@@ -55,7 +55,7 @@ export const reactToPost = functions.onCall(async (request) => {
       // Does not exist: create reaction and increment count
       tx.set(reactionRef, {
         postId: data.postId,
-        uid,
+        userId: uid,
         reactionType: newType,
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       });

@@ -43,7 +43,7 @@ export const reportPost = functions.onCall(async (request) => {
   // 3. Write report
   await db.collection('reports').add({
     postId: data.postId,
-    reporterUid: uid,
+    reporterId: uid,
     reason: data.reason as ReportReason,
     comment: data.comment != null ? normalizeText(String(data.comment)).slice(0, 200) : null,
     createdAt: admin.firestore.FieldValue.serverTimestamp(),
