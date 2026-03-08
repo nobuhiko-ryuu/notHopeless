@@ -20,6 +20,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,7 +45,14 @@ fun PostScreen(
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("投稿する") }) },
+        topBar = {
+            TopAppBar(
+                title = { Text("エピソードを投稿する", style = MaterialTheme.typography.titleMedium) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                ),
+            )
+        },
     ) { padding ->
         Column(
             modifier = Modifier
@@ -54,7 +62,6 @@ fun PostScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // シーン選択
             Text("どこで？", style = MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 SceneType.values().forEach { scene ->
@@ -65,7 +72,6 @@ fun PostScreen(
                     )
                 }
             }
-            // 優しさタイプ
             Text("どんな優しさ？", style = MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 KindnessType.values().forEach { kt ->
@@ -76,7 +82,6 @@ fun PostScreen(
                     )
                 }
             }
-            // 自分の状態（任意）
             Text("その時の自分（任意）", style = MaterialTheme.typography.labelLarge)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 UserStateType.values().forEach { us ->
@@ -87,7 +92,6 @@ fun PostScreen(
                     )
                 }
             }
-            // 本文
             Text("なにがあった？", style = MaterialTheme.typography.labelLarge)
             OutlinedTextField(
                 value = uiState.body,
@@ -114,7 +118,6 @@ fun PostScreen(
                     )
                 }
             }
-            // 変化
             Text("それで、どう変わった？", style = MaterialTheme.typography.labelLarge)
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 EffectType.values().forEach { ef ->
@@ -125,7 +128,6 @@ fun PostScreen(
                     )
                 }
             }
-            // エラー表示
             uiState.submitError?.let { err ->
                 val msg = when (err) {
                     SubmitError.PERSONAL_INFO -> "個人情報が含まれているため送信できませんでした"
@@ -136,7 +138,6 @@ fun PostScreen(
                 }
                 Text(msg, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
-            // 送信ボタン
             Button(
                 onClick = { viewModel.submit() },
                 enabled = viewModel.isSubmitEnabled,
